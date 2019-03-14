@@ -43,7 +43,7 @@ namespace test
             var parts = ProQuoteDataHelper.GetPartsByQuoteNumber(quoteNumber);
 
             // TODO: create the service order with parts
-            var partsDto = new List<object>();
+            var partsDto = new List<QuotePart>();
             var serviceOrder = tpApi.CreateServiceOrderWithPartsUsed(quote, partsDto);
         }
 

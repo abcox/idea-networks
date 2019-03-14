@@ -757,7 +757,7 @@ namespace test
             return contentType;
         }
 
-        public Models.TigerPaw.CreateServiceOrderResponse CreateServiceOrderWithPartsUsed(Quote quote, List<object> partsUsed)
+        public Models.TigerPaw.CreateServiceOrderResponse CreateServiceOrderWithPartsUsed(Quote quote, List<QuotePart> partsUsed)
         {
             // create service order via POST /api/ServiceOrders CreateServiceOrderModel ServiceOrderResponse
             var serviceOrder = CreateServiceOrderFromQuote(quote);
