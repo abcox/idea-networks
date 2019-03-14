@@ -757,11 +757,15 @@ namespace test
             return contentType;
         }
 
-        public Models.TigerPaw.CreateServiceOrderResponse CreateServiceOrderWithPartsUsed(List<object> partsUsed)
+        public Models.TigerPaw.CreateServiceOrderResponse CreateServiceOrderWithPartsUsed(Quote quote, List<object> partsUsed)
         {
             // create service order via POST /api/ServiceOrders CreateServiceOrderModel ServiceOrderResponse
-            var serviceOrder = CreateServiceOrder();
+            var serviceOrder = CreateServiceOrderFromQuote(quote);
             // if response is not successful or no ServiceOrder number is returned
+            if (serviceOrder == null)
+            {
+                throw new ApplicationException($"Failed to create new service order for quote {quote.number}");
+            }
             // for each part/item, via POST /api/serviceorders/{serviceOrderNumber}/parts
             foreach (object part in partsUsed)
             {
@@ -770,8 +774,9 @@ namespace test
             return serviceOrder;
         }
 
-        private Models.TigerPaw.CreateServiceOrderResponse CreateServiceOrder()
+        private Models.TigerPaw.CreateServiceOrderResponse CreateServiceOrderFromQuote(Quote quote)
         {
+            // todo: create service order with reference
             return new Models.TigerPaw.CreateServiceOrderResponse();
         }
 
