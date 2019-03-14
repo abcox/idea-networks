@@ -44,7 +44,7 @@ namespace test
 
             // TODO: create the service order with parts
             var partsDto = new List<object>();
-            var serviceOrder = tpApi.CreateServiceOrderWithPartsUsed(partsDto);
+            var serviceOrder = tpApi.CreateServiceOrderWithPartsUsed(quote, partsDto);
         }
 
         private static IConfiguration Configuration
