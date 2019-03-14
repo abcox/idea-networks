@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -424,6 +426,125 @@ namespace test
         }
 
         /// <summary>
+        /// POST /api/serviceorders/search/reference
+        /// </summary>
+        public Models.TigerPaw.Responses.ServiceOrderSearchResponse ServiceOrderSearchByReference(string reference, int pageSize = 1, int pageStart = 1)
+        {
+            try
+            {
+                var message = string.Empty;
+                const string uri = "/api/serviceorders/search/reference";
+
+                string postData = $@"<Criteria>{reference}</Criteria>";
+
+                Console.WriteLine("Advanced Search");
+
+                var encoding = new UTF8Encoding();
+                var data = encoding.GetBytes(postData);
+
+                var headerDate = GetHeaderDateTime();
+                // the public and private key should be changed to the correct values for the rep
+                var token = GenerateAuthenticationToken("post", uri, headerDate, DefaultPublicKey, DefaultPrivateKey);
+
+                //var url = string.Format("{0}{1}", BaseUri, uri);
+                var url = new UriBuilder(BaseUri);
+                url.Path = uri;
+                var queryParameters = HttpUtility.ParseQueryString(string.Empty);
+                //queryParameters["criteria"] = reference;
+                queryParameters["pageSize"] = pageSize.ToString();
+                queryParameters["startRow"] = pageStart.ToString();
+                url.Query = queryParameters.ToString();
+                Console.WriteLine(url);
+
+                var request = (HttpWebRequest)WebRequest.Create(url.ToString());
+                request.Method = WebRequestMethods.Http.Post;
+                request.Headers.Add("Authorization", string.Format("TSI {0}", token));
+                request.Headers.Add("X-TSI-Date", headerDate);
+                request.Accept = DefaultAcceptHeader;
+                request.ContentType = DefaultAcceptHeader;
+                request.ContentLength = data.Length;
+                request.GetRequestStream().Write(data, 0, data.Length);
+
+                Console.WriteLine("Processing...");
+                using (var response = request.GetResponse() as HttpWebResponse)
+                {
+                    if (response != null)
+                    {
+                        Console.WriteLine("Response Code: {0}", response.StatusCode);
+                        if (response.StatusCode == HttpStatusCode.OK)
+                        {
+
+                            // TODO:  can we deserialize this response to a reponse model object/type ???
+
+                            return new Models.TigerPaw.Responses.ServiceOrderSearchResponse();
+
+                            Console.WriteLine("Processing Response...");
+                            using (var stream = response.GetResponseStream())
+                            {
+                                if (stream != null)
+                                {
+                                    var reader = new StreamReader(stream);
+                                    var responseValue = reader.ReadToEnd();
+                                    var document = XDocument.Parse(responseValue);
+
+                                    if (document.Root != null)
+                                    {
+                                        var decendants = document.Descendants("SearchAccountResponse");
+                                        var results = (from i in decendants
+                                                       let xSuccess = i.Element("Success")
+                                                       let xTotalCount = i.Element("TotalCount")
+                                                       let xPageSize = i.Element("PageSize")
+                                                       let xNextRow = i.Element("NextRow")
+                                                       select new
+                                                       {
+                                                           Success = xSuccess != null && Convert.ToBoolean(xSuccess.Value),
+                                                           TotalCount = Convert.ToInt32(xTotalCount.Value),
+                                                           PageSize = Convert.ToInt32(xPageSize.Value),
+                                                           NextRow = Convert.ToInt32(xNextRow.Value)
+                                                       }).FirstOrDefault();
+
+
+                                        if (results != null
+                                            && results.Success == true)
+                                        {
+                                            message = string.Format("Matching accounts {0}", results.TotalCount);
+
+                                            var currentPage = document.Descendants("AccountSummary");
+                                            currentPage.ToList().ForEach(PrintAccountName);
+                                        }
+                                        else
+                                        {
+                                            message = "Did not process response properly.";
+                                        }
+                                    }
+                                    else
+                                    {
+                                        message = "No document root found.";
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            message = "Evaluate response code for more detailed error...";
+                        }
+                    }
+
+
+                }
+
+                Console.WriteLine(message);
+                Console.ReadLine();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                Console.ReadLine();
+            }
+            return null;
+        }
+
+        /// <summary>
         /// Get documents attached to an existing opportunity.
         /// </summary>
         private void OpportunityDocuments()
@@ -635,5 +756,52 @@ namespace test
             }
             return contentType;
         }
+
+        public Models.TigerPaw.CreateServiceOrderResponse CreateServiceOrderWithPartsUsed(List<object> partsUsed)
+        {
+            // create service order via POST /api/ServiceOrders CreateServiceOrderModel ServiceOrderResponse
+            var serviceOrder = CreateServiceOrder();
+            // if response is not successful or no ServiceOrder number is returned
+            // for each part/item, via POST /api/serviceorders/{serviceOrderNumber}/parts
+            foreach (object part in partsUsed)
+            {
+                CreateServiceOrderPartsUsed(serviceOrder.ServiceOrderSummary.ServiceOrderNumber, part);
+            }
+            return serviceOrder;
+        }
+
+        private Models.TigerPaw.CreateServiceOrderResponse CreateServiceOrder()
+        {
+            return new Models.TigerPaw.CreateServiceOrderResponse();
+        }
+
+        private Models.TigerPaw.ServiceOrderPartsUsedResponse CreateServiceOrderPartsUsed(int serviceOrderNumber, object part)
+        {
+            // todo!
+            return new Models.TigerPaw.ServiceOrderPartsUsedResponse();
+        }
+
+        private Models.TigerPaw.Responses.GetServiceOrderResponse GetServiceOrder(int serviceOrderNumber)
+        {
+            // GET /api/serviceorders/{serviceOrderNumber}
+
+            return new Models.TigerPaw.Responses.GetServiceOrderResponse();
+        }
+
+        public bool ServiceOrderExists(int serviceOrderNumber)
+        {
+            return GetServiceOrder(serviceOrderNumber) != null;
+        }
+        
+        public bool ServiceOrderExistsWithReferenceToQuote(string quoteNumber)
+        {
+            return ServiceOrderSearchByReference(quoteNumber).TotalCount > 0;
+        }
+
+        //public List<Models.TigerPaw.Responses.ServiceOrder> ServiceOrderSearchByReference(string reference, int pageSize = 1, int pageStart = 1)
+        //{
+        //    return new Models.TigerPaw.Responses.ServiceOrderSearchResponse().ServiceOrders.Where(p => p.Reference.Contains(reference)).ToList();
+        //}
+
     }
 }
