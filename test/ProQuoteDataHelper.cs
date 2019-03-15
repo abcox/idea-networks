@@ -10,7 +10,7 @@ namespace test
         public static Quote GetQuote(string name)
         {
             Quote quote = null;
-            name = GetQuoteName(name);
+            name = GetQuoteByName(name);
             if (name != null) quote = new Quote { name = name };
             return quote;
         }
@@ -21,7 +21,7 @@ namespace test
             return new List<QuotePart>();
         }
 
-        static string GetQuoteName(string name)
+        static string GetQuoteByName(string name)
         {
             //string name = null;
             var connectionString = ConfigurationHelper.ProQuoteConnectionString;
