@@ -34,6 +34,8 @@ namespace test
                 throw new ApplicationException($"Quote with number {quoteNumber} not found.");
             }
 
+            Console.WriteLine($"Quote '{quote.name}' found");
+
             var serviceOrders = tpApi.ServiceOrderSearchByReference(quoteNumber);
             if (serviceOrders?.TotalCount > 0)
             {
@@ -46,6 +48,8 @@ namespace test
             // TODO: create the service order with parts
             var partsDto = new List<QuotePart>();
             var serviceOrder = tpApi.CreateServiceOrderWithPartsUsed(quote, partsDto);
+
+            Console.ReadLine();
         }
 
     }

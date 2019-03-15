@@ -8,17 +8,21 @@ namespace test
 {
     class ConfigurationHelper
     {
-        private static readonly IConfigurationRoot _config;
+        private static IConfigurationRoot _config = null;
+
+        public ConfigurationHelper() { _config = null; }
 
         public static IConfiguration Configuration
         {
             get
             {
-                return _config ?? new ConfigurationBuilder()
+                if (_config == null)
+                    _config = new ConfigurationBuilder()
                     .SetBasePath(Directory.GetCurrentDirectory())
                     .AddEnvironmentVariables()
                     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                     .Build();
+                return _config;
             }
         }
 
