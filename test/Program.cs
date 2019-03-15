@@ -24,26 +24,26 @@ namespace test
 
             // todo:  validate request
 
-            string quoteNumber = null;
-            if (args.Length > 0) quoteNumber = args[1];
+            string quoteName = null;
+            if (args.Length > 0) quoteName = args[0];
 
             // todo: lookup this quoteNumber in ProQuote (table) ?
-            var quote = ProQuoteDataHelper.GetQuote(quoteNumber);
+            var quote = ProQuoteDataHelper.GetQuote(quoteName);
             if (quote == null)
             {
-                throw new ApplicationException($"Quote with number {quoteNumber} not found.");
+                throw new ApplicationException($"Quote with name {quoteName} not found.");
             }
 
             Console.WriteLine($"Quote '{quote.name}' found");
 
-            var serviceOrders = tpApi.ServiceOrderSearchByReference(quoteNumber);
+            var serviceOrders = tpApi.ServiceOrderSearchByReference(quoteName);
             if (serviceOrders?.TotalCount > 0)
             {
-                throw new ApplicationException($"A service order with number {serviceOrders} exists with reference '{quoteNumber}'");
+                throw new ApplicationException($"A service order with number {serviceOrders} exists with quote '{quoteName}'");
             }
 
             // TODO: get service order parts from ProQuote manifest
-            var parts = ProQuoteDataHelper.GetPartsByQuoteNumber(quoteNumber);
+            var parts = ProQuoteDataHelper.GetPartsByQuoteName(quoteName);
 
             // TODO: create the service order with parts
             var partsDto = new List<QuotePart>();

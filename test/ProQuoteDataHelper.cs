@@ -7,23 +7,25 @@ namespace test
 {
     class ProQuoteDataHelper
     {
-        public static Quote GetQuote(string quoteNumber)
+        public static Quote GetQuote(string name)
         {
-            var name = GetQuoteName(18);
-            return new Quote { name = name };
+            Quote quote = null;
+            name = GetQuoteName(name);
+            if (name != null) quote = new Quote { name = name };
+            return quote;
         }
 
-        public static List<QuotePart> GetPartsByQuoteNumber(string quoteNumber)
+        public static List<QuotePart> GetPartsByQuoteName(string name)
         {
             // todo:  query parts from db
             return new List<QuotePart>();
         }
 
-        static string GetQuoteName(int id)
+        static string GetQuoteName(string name)
         {
-            string name = null;
+            //string name = null;
             var connectionString = ConfigurationHelper.ProQuoteConnectionString;
-            var cmdText = $"select top 1 [name] from tblquote_main where quote_id = {id}"; // "CREATE TABLE Dogs1 (Weight INT, Name TEXT, Breed TEXT)";
+            var cmdText = $"select top 1 [name] from tblquote_main where [name] = '{name}'"; // "CREATE TABLE Dogs1 (Weight INT, Name TEXT, Breed TEXT)";
 
             using (SqlConnection sqlConnection = new SqlConnection(connectionString))
             {
@@ -34,9 +36,17 @@ namespace test
                     {
                         //command.ExecuteNonQuery();
                         var reader = command.ExecuteReader();
-                        while (reader.Read())
+                        if (reader.HasRows)
                         {
-                            name = reader.GetValue(reader.GetOrdinal("name")) as string;
+                            while (reader.Read())
+                            {
+                                name = reader.GetValue(reader.GetOrdinal("name")) as string;
+                            }
+                        }
+                        else
+                        {
+                            //name = reader.HasRows ? null : name;
+                            name = null;
                         }
                     }
                     catch
