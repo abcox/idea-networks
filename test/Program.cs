@@ -11,10 +11,10 @@ namespace test
 
         static void Main(string[] args)
         {
-            var storageConnectionString = Configuration.GetConnectionString("ProQuote");
-
-            var privateKey = Configuration.GetSection("PrivateKey").Value;
-            var publicKey = Configuration.GetSection("PublicKey").Value;
+            var config = ConfigurationHelper.Configuration;
+            var storageConnectionString = config.GetConnectionString("ProQuote");
+            var privateKey = config.GetSection("PrivateKey").Value;
+            var publicKey = config.GetSection("PublicKey").Value;
 
             //Console.WriteLine($"PublicKey: {publicKey}, PrivateKey: {privateKey}");
 
@@ -24,7 +24,8 @@ namespace test
 
             // todo:  validate request
 
-            var quoteNumber = args[1];
+            string quoteNumber = null;
+            if (args.Length > 0) quoteNumber = args[1];
 
             // todo: lookup this quoteNumber in ProQuote (table) ?
             var quote = ProQuoteDataHelper.GetQuote(quoteNumber);
@@ -34,7 +35,7 @@ namespace test
             }
 
             var serviceOrders = tpApi.ServiceOrderSearchByReference(quoteNumber);
-            if (serviceOrders.TotalCount > 0)
+            if (serviceOrders?.TotalCount > 0)
             {
                 throw new ApplicationException($"A service order with number {serviceOrders} exists with reference '{quoteNumber}'");
             }
@@ -45,18 +46,6 @@ namespace test
             // TODO: create the service order with parts
             var partsDto = new List<QuotePart>();
             var serviceOrder = tpApi.CreateServiceOrderWithPartsUsed(quote, partsDto);
-        }
-
-        private static IConfiguration Configuration
-        {
-            get
-            {
-                return _config ?? new ConfigurationBuilder()
-                    .SetBasePath(Directory.GetCurrentDirectory())
-                    .AddEnvironmentVariables()
-                    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                    .Build();
-            }
         }
 
     }

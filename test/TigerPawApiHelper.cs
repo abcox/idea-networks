@@ -30,7 +30,7 @@ namespace test
 
             try
             {
-                UserAuthentication();
+                //UserAuthentication(); // unauthorized (401)
 
                 //AdvancedSearch();
 
@@ -764,7 +764,7 @@ namespace test
             // if response is not successful or no ServiceOrder number is returned
             if (serviceOrder == null)
             {
-                throw new ApplicationException($"Failed to create new service order for quote {quote.number}");
+                throw new ApplicationException($"Failed to create new service order for quote {quote.name}");
             }
             // for each part/item, via POST /api/serviceorders/{serviceOrderNumber}/parts
             foreach (object part in partsUsed)
