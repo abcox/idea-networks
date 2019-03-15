@@ -31,7 +31,10 @@ namespace test
             var quote = ProQuoteDataHelper.GetQuote(quoteName);
             if (quote == null)
             {
-                throw new ApplicationException($"Quote with name {quoteName} not found.");
+                var msg = $"Quote with name {quoteName} not found.";
+                //throw new ApplicationException(msg);
+                Console.WriteLine(msg);
+                Environment.Exit(-1);
             }
 
             Console.WriteLine($"Quote '{quote.name}' found");

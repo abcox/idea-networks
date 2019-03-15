@@ -13,3 +13,7 @@ Develop interface between ProQuote and TigerPaw.
 		3) There is not an existing, viable (not been voided), service order that references the quote
 		4) Then the service order will be created
 	e) The contents of the service order will be derived from the quote item manifest (details to be expanded here)
+
+
+DEV NOTES:
+- to build the bin/exe, run (from sln folder): dotnet publish -c Release -r win10-x64
