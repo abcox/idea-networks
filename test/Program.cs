@@ -2,12 +2,13 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using test.Models.ProQuote;
 
 namespace test
 {
     class Program
     {
-        private static IConfiguration _config;
+        //private static IConfiguration _config;
 
         static void Main(string[] args)
         {
@@ -24,6 +25,9 @@ namespace test
 
             // todo:  validate request
 
+            // TEST dapper pull of quotes
+            var quotes = ProQuoteDataHelper.GetQuotes();
+
             string quoteName = null;
             if (args.Length > 0) quoteName = args[0];
 
@@ -37,7 +41,7 @@ namespace test
                 Environment.Exit(-1);
             }
 
-            Console.WriteLine($"Quote '{quote.name}' found");
+            Console.WriteLine($"Quote '{quote.Name}' found");
 
             var serviceOrders = tpApi.ServiceOrderSearchByReference(quoteName);
             if (serviceOrders?.TotalCount > 0)
@@ -49,7 +53,7 @@ namespace test
             var parts = ProQuoteDataHelper.GetPartsByQuoteName(quoteName);
 
             // TODO: create the service order with parts
-            var partsDto = new List<QuotePart>();
+            var partsDto = new List<QuoteItem>();
             var serviceOrder = tpApi.CreateServiceOrderWithPartsUsed(quote, partsDto);
 
             Console.ReadLine();

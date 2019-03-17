@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using System.Xml.Linq;
+using test.Models.ProQuote;
 
 namespace test
 {
@@ -45,7 +46,7 @@ namespace test
             }
         }
 
-        private const string BaseUri = @"https://api2.tigerpawsoftware.com";
+        private const string BaseUri = @"http://api.ideanetworks.com"; // @"https://api2.tigerpawsoftware.com";
         private const string DefaultAcceptHeader = "application/xml";
 
         //todo: need to replace the public and private keys
@@ -474,7 +475,7 @@ namespace test
                         if (response.StatusCode == HttpStatusCode.OK)
                         {
 
-                            // TODO:  can we deserialize this response to a reponse model object/type ???
+                            // TODO:  can we deserialize this response to a response model object/type ???
 
                             return new Models.TigerPaw.Responses.ServiceOrderSearchResponse();
 
@@ -757,14 +758,14 @@ namespace test
             return contentType;
         }
 
-        public Models.TigerPaw.CreateServiceOrderResponse CreateServiceOrderWithPartsUsed(Quote quote, List<QuotePart> partsUsed)
+        public Models.TigerPaw.CreateServiceOrderResponse CreateServiceOrderWithPartsUsed(Quote quote, List<QuoteItem> partsUsed)
         {
             // create service order via POST /api/ServiceOrders CreateServiceOrderModel ServiceOrderResponse
             var serviceOrder = CreateServiceOrderFromQuote(quote);
             // if response is not successful or no ServiceOrder number is returned
             if (serviceOrder == null)
             {
-                throw new ApplicationException($"Failed to create new service order for quote {quote.name}");
+                throw new ApplicationException($"Failed to create new service order for quote {quote.Name}");
             }
             // for each part/item, via POST /api/serviceorders/{serviceOrderNumber}/parts
             foreach (object part in partsUsed)
