@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
@@ -10,8 +12,12 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
+using System.Xml;
 using System.Xml.Linq;
+using System.Xml.Serialization;
 using test.Models.ProQuote;
+using test.Models.TigerPaw;
+using test.Models.TigerPaw.Responses;
 
 namespace test
 {
@@ -36,7 +42,7 @@ namespace test
 
             try
             {
-                UserAuthentication(); // unauthorized (401)
+                //UserAuthentication(); response 200 recieved 2019-03-18
 
                 //AdvancedSearch();
 
@@ -145,6 +151,125 @@ namespace test
             return response;
         }
 
+        private HttpWebRequest GetRequest(string path, string method, byte[] data = null)
+        {
+            var headerDate = GetHeaderDateTime();
+
+            // the public and private key should be changed to the correct values for the rep
+            var token = GenerateAuthenticationToken(method.ToLower(), path, headerDate, DefaultPublicKey, DefaultPrivateKey);
+
+            var url = new UriBuilder(_baseUri)
+            {
+                Path = Path.Combine(path)
+            }; // string.Format("{0}{1}", _baseUri, path);
+            //Console.WriteLine(url);
+
+            var request = (HttpWebRequest)WebRequest.Create(url.ToString());
+
+            request.Method = method; // WebRequestMethods.Http.Get;
+            // set the authorization token using the TSI custom schema
+            request.Headers.Add("Authorization", $"TSI {token}");
+            // set the date on the header, using X-TSI-Date because .NET does not want to set the Date header here
+            request.Headers.Add("X-TSI-Date", headerDate);
+            request.Accept = DefaultAcceptHeader;
+            request.ContentType = DefaultAcceptHeader;
+            
+            if (method == WebRequestMethods.Http.Post)
+            {
+                request.ContentLength = data.Length;
+                request.GetRequestStream().Write(data, 0, data.Length);
+            }
+
+            return request;
+        }
+
+
+        /// <summary>
+        /// Sample of testing user authentication.
+        /// </summary>
+        public ServiceOrdersPostResponse ServiceOrdersPost(ServiceOrdersPostRequest serviceOrdersPostRequest)
+        {
+            const string path = "/api/serviceorders";
+            Console.WriteLine($"Calling endpoint at {path}...");
+            try
+            {
+                string postData = null;
+
+                //var serviceOrder = new ServiceOrdersPostRequest();
+                string xmlPostData = null;
+                using (var stringWriter = new StringWriter())
+                {
+                    using (XmlWriter xmlWriter = XmlWriter.Create(stringWriter))
+                    {
+                        XmlSerializer xmlSerializer = new XmlSerializer(typeof(ServiceOrdersPostRequest));
+                        xmlSerializer.Serialize(xmlWriter, serviceOrdersPostRequest);
+                        xmlPostData = stringWriter.ToString();
+                    }
+                }
+                postData = xmlPostData;
+                var encoding = new UTF8Encoding();
+                var data = encoding.GetBytes(postData);
+                var request = GetRequest(path, WebRequestMethods.Http.Post, data);
+
+                HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    //WebHeaderCollection headers = response.Headers;
+                    ServiceOrdersPostResponse serviceOrdersPostResponse = null;
+                    using (var reader = new StreamReader(response.GetResponseStream(), ASCIIEncoding.UTF8))
+                    {
+                        XmlSerializer serializer = new XmlSerializer(typeof(DiagnosticsValidateUserResponse));
+                        serviceOrdersPostResponse = (ServiceOrdersPostResponse)serializer.Deserialize(reader);
+                        reader.Close();
+                    }
+                    Console.WriteLine($"Call to {path} {(serviceOrdersPostResponse.Success ? "succeeded" : "failed")}: {serviceOrdersPostResponse.Message}");
+                }
+                else
+                {
+                    Console.WriteLine($"Call to {path} responsed with status code {response.StatusCode}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Call to {path} raised exception. {ex.Message}");
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// https://api2.tigerpawsoftware.com/docs/index#!/Diagnostics/Diagnostics_ValidateUser
+        /// </summary>
+        public void GetDiagnosticsValidateUser()
+        {
+            const string path = "/api/diagnostics/validate/user";
+            try
+            {
+                var request = GetRequest(path, WebRequestMethods.Http.Get);
+                HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    //WebHeaderCollection headers = response.Headers;
+                    DiagnosticsValidateUserResponse diagnosticsValidateUserResponse = null;
+                    using (var reader = new StreamReader(response.GetResponseStream(), ASCIIEncoding.UTF8))
+                    {
+                        XmlSerializer serializer = new XmlSerializer(typeof(DiagnosticsValidateUserResponse));
+                        diagnosticsValidateUserResponse = (DiagnosticsValidateUserResponse)serializer.Deserialize(reader);
+                        reader.Close();
+                    }
+                    Console.WriteLine($"{(diagnosticsValidateUserResponse.Success ? "A" : "Not a")}uthenticated. Message: {diagnosticsValidateUserResponse.Message}");
+                }
+                else
+                {
+                    Console.WriteLine($"Response status '{response.StatusCode}'");
+                }                
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
+            }
+        }
 
         /// <summary>
         /// Sample of testing user authentication.
@@ -764,7 +889,7 @@ namespace test
             return contentType;
         }
 
-        public Models.TigerPaw.CreateServiceOrderResponse CreateServiceOrderWithPartsUsed(Quote quote, List<QuoteItem> partsUsed)
+        public Models.TigerPaw.ServiceOrdersPostResponse CreateServiceOrderWithPartsUsed(Quote quote, List<QuoteItem> partsUsed)
         {
             // create service order via POST /api/ServiceOrders CreateServiceOrderModel ServiceOrderResponse
             var serviceOrder = CreateServiceOrderFromQuote(quote);
@@ -781,10 +906,10 @@ namespace test
             return serviceOrder;
         }
 
-        private Models.TigerPaw.CreateServiceOrderResponse CreateServiceOrderFromQuote(Quote quote)
+        private Models.TigerPaw.ServiceOrdersPostResponse CreateServiceOrderFromQuote(Quote quote)
         {
             // todo: create service order with reference
-            return new Models.TigerPaw.CreateServiceOrderResponse();
+            return new Models.TigerPaw.ServiceOrdersPostResponse();
         }
 
         private Models.TigerPaw.ServiceOrderPartsUsedResponse CreateServiceOrderPartsUsed(int serviceOrderNumber, object part)

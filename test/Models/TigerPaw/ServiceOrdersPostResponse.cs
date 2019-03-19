@@ -4,7 +4,7 @@ using System.Text;
 
 namespace test.Models.TigerPaw
 {
-    class CreateServiceOrderResponse
+    class ServiceOrdersPostResponse
     {
         public ServiceOrderSummary ServiceOrderSummary { get; set; }
         public bool Success { get; set; }

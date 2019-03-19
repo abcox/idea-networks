@@ -4,8 +4,104 @@ using System.Text;
 
 namespace test.Models.TigerPaw
 {
-    class CreateServiceOrderModel
+    public class ServiceOrdersPostRequest
     {
+        public ServiceOrdersPostRequest()
+        {
+            AccountNumber = 0;
+            ContactNumber = 0;
+            TechnicianAssigned= 0;
+            EstimatedHours= 0;
+            EstimatedMinutes= 0;
+            CallBackCount= 0;
+            RepToCredit= 0;
+            ContractNumber= 0;
+            TakenBy= 0;
+            DispatchBoardNumber= 0;
+            PayMethodsId= 0;
+            Severity= 0;
+            AlternatePhoneNumber= string.Empty;
+            AlternatePhoneLocation= string.Empty;
+            AlternateContactEmailAddress= string.Empty;
+            AlternateContactPhoneNumber= string.Empty;
+            AlternateContactPhoneLocation= string.Empty;
+            BriefDescription= string.Empty;
+            Reference= string.Empty;
+            Priority= string.Empty;
+            Status= string.Empty;
+            ServiceOrderType= string.Empty;
+            System= string.Empty;
+            WorkRequested= string.Empty;
+            WorkPerformed= string.Empty;
+            PaymentMethod= string.Empty;
+            ShippingMethod= string.Empty;
+            InternalComments= string.Empty;
+            DirectionsToLocation= string.Empty;
+            CustomerPurchaseOrder= string.Empty;
+            VerifiedBy= string.Empty;
+            ServiceZone= string.Empty;
+            RequestedBy= string.Empty;
+            TagNumber= string.Empty;
+            LoanAgreement= string.Empty;
+            DebitCreditMemo= string.Empty;
+            InvoiceTerms= string.Empty;
+            FreightTerms= string.Empty;
+            SalesTaxCode= string.Empty;
+            DateTimeReceived= new DateTime(); // 2019-03-19T00=57=14.823Z
+            DateTimeRequested = new DateTimeRequested {
+                Date = new DateTime(),
+                Time= new DateTime()
+            };
+            DateTimeOpened= new DateTimeOpened {
+                DateTime = new DateTime()
+            };
+            DateTimeClosed= new DateTimeClosed {
+                DateTime = new DateTime()
+            };
+            VerifiedDate= new VerifiedDate {
+                DateTime = new DateTime()
+            };
+            ResolvedOnPhone= true;
+            BidPrice= 0;
+            TradeIn= 0;
+            Deposit= 0;
+            Freight= 0;
+            BillToAddressType= string.Empty;
+            BillToAddressAccountNumber= 0;
+            BillTo= new BillTo {
+                Name = string.Empty,
+                Address1= string.Empty,
+                Address2= string.Empty,
+                City= string.Empty,
+                State= string.Empty,
+                PostalCode= string.Empty,
+                Country= string.Empty,
+                ContactName= string.Empty,
+                ContactPhone= string.Empty
+            };
+            ShipToAddressType= string.Empty;
+            ShipToAddressAccountNumber= 0;
+            ShipTo= new ShipTo {
+                Name = string.Empty,
+                Address1= string.Empty,
+                Address2= string.Empty,
+                City= string.Empty,
+                State= string.Empty,
+                PostalCode= string.Empty,
+                Country= string.Empty,
+                ContactName= string.Empty,
+                ContactPhone= string.Empty
+            };
+            UseAlternateShipToTaxCode= true;
+            CanReassignToHourlyUsageContractAlreadyInvoiced= true;
+            CanUpdateContractMeterReadingToServiceOrderReading= true;
+            AllowInactiveContract= true;
+            AllowFutureContract= true;
+            AllowContractNoRemaining= true;
+            UseContractDefaultTech= true;
+            DisplayOnCustomerPortal = true;
+        }
+
         public int AccountNumber { get; set; }
         public int ContactNumber { get; set; }
         public int TechnicianAssigned { get; set; }

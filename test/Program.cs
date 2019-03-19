@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using test.Models.ProQuote;
+using test.Models.TigerPaw;
 
 namespace test
 {
@@ -14,7 +15,10 @@ namespace test
         {
             var config = ConfigurationHelper.Configuration;
             var storageConnectionString = config.GetConnectionString("ProQuote");
-            var tsiApiEnvironment = "tsiApi_prod";
+            string tsiApiEnvironment = "tsiApi_sand";
+#if !DEBUG
+            tsiApiEnvironment = "tsiApi_prod";
+#endif
             var serviceUrl = config.GetSection($"{tsiApiEnvironment}:serviceUrl").Value;
             var privateKey = config.GetSection($"{tsiApiEnvironment}:privateKey").Value;
             var publicKey = config.GetSection($"{tsiApiEnvironment}:publicKey").Value;
@@ -30,6 +34,29 @@ namespace test
             // todo:  parse args and validate, if none or badly formed (invalid), then present command useage
 
             // todo:  validate request
+
+            // user authentication check
+            tpApi.GetDiagnosticsValidateUser();
+
+            // TEST ServiceOrdersPost
+            var serviceOrder = new ServiceOrdersPostRequest()
+            {
+                AccountNumber = 1000,
+                BriefDescription = @"Test from IdeaNetworks (adam@adamcox.net)",
+                DateTimeRequested = new DateTimeRequested {
+                    Date = DateTime.UtcNow,
+                    Time = DateTime.UtcNow,
+                },
+                BillToAddressType = "Default",
+                BillTo = new BillTo
+                {
+                    Address1 = "12345 Main St",
+                    City = "Wilmington",
+                    State = "NC",
+                    PostalCode = "28403"
+                }
+            };
+            tpApi.ServiceOrdersPost(serviceOrder);
 
             // TEST dapper pull of quotes
             List<Quote> quotes = null;
@@ -69,7 +96,7 @@ namespace test
 
             // TODO: create the service order with parts
             var partsDto = new List<QuoteItem>();
-            var serviceOrder = tpApi.CreateServiceOrderWithPartsUsed(quote, partsDto);
+            //var serviceOrder = tpApi.CreateServiceOrderWithPartsUsed(quote, partsDto);
 
             Console.ReadLine();
         }
