@@ -14,19 +14,34 @@ namespace test
         {
             var config = ConfigurationHelper.Configuration;
             var storageConnectionString = config.GetConnectionString("ProQuote");
-            var privateKey = config.GetSection("PrivateKey").Value;
-            var publicKey = config.GetSection("PublicKey").Value;
+            var tsiApiEnvironment = "tsiApi_prod";
+            var serviceUrl = config.GetSection($"{tsiApiEnvironment}:serviceUrl").Value;
+            var privateKey = config.GetSection($"{tsiApiEnvironment}:privateKey").Value;
+            var publicKey = config.GetSection($"{tsiApiEnvironment}:publicKey").Value;
 
             //Console.WriteLine($"PublicKey: {publicKey}, PrivateKey: {privateKey}");
 
-            var tpApi = new TigerPawApiHelper(privateKey, publicKey);  // unauthorized (401)
+            var tpApi = new TigerPawApiHelper(
+                serviceUrl: serviceUrl,
+                privateKey: privateKey,
+                publicKey: publicKey
+                );  // unauthorized (401)
 
             // todo:  parse args and validate, if none or badly formed (invalid), then present command useage
 
             // todo:  validate request
 
             // TEST dapper pull of quotes
-            var quotes = ProQuoteDataHelper.GetQuotes();
+            List<Quote> quotes = null;
+            try
+            {
+                quotes = ProQuoteDataHelper.GetQuotes();
+                Console.Write($"Quote count = {quotes.Count}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred:  {ex.Message}");
+            }
 
             string quoteName = null;
             if (args.Length > 0) quoteName = args[0];

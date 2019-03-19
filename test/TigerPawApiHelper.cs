@@ -24,14 +24,19 @@ namespace test
 
     class TigerPawApiHelper
     {
-        public TigerPawApiHelper(string publicKey, string privateKey)
+        public TigerPawApiHelper(
+            string serviceUrl,
+            string publicKey,
+            string privateKey
+            )
         {
+            _baseUri = serviceUrl;
             _publicKey = publicKey;
             _privateKey = privateKey;
 
             try
             {
-                //UserAuthentication(); // unauthorized (401)
+                UserAuthentication(); // unauthorized (401)
 
                 //AdvancedSearch();
 
@@ -46,7 +51,8 @@ namespace test
             }
         }
 
-        private const string BaseUri = @"http://api.ideanetworks.com"; // @"https://api2.tigerpawsoftware.com";
+        //private const string BaseUri = @"https://api2.tigerpawsoftware.com"; // @"http://api.ideanetworks.com";
+        private string _baseUri = @"https://api2.tigerpawsoftware.com"; // @"http://api.ideanetworks.com";
         private const string DefaultAcceptHeader = "application/xml";
 
         //todo: need to replace the public and private keys
@@ -216,7 +222,7 @@ namespace test
                 // the public and private key should be changed to the correct values for the rep
                 var token = GenerateAuthenticationToken("get", uri, headerDate, DefaultPublicKey, DefaultPrivateKey);
 
-                var url = string.Format("{0}{1}", BaseUri, uri);
+                var url = string.Format("{0}{1}", _baseUri, uri);
                 Console.WriteLine(url);
 
                 var request = (HttpWebRequest)WebRequest.Create(url);
@@ -341,7 +347,7 @@ namespace test
                 // the public and private key should be changed to the correct values for the rep
                 var token = GenerateAuthenticationToken("post", uri, headerDate, DefaultPublicKey, DefaultPrivateKey);
 
-                var url = string.Format("{0}{1}", BaseUri, uri);
+                var url = string.Format("{0}{1}", _baseUri, uri);
                 Console.WriteLine(url);
 
                 var request = (HttpWebRequest)WebRequest.Create(url);
@@ -448,7 +454,7 @@ namespace test
                 var token = GenerateAuthenticationToken("post", uri, headerDate, DefaultPublicKey, DefaultPrivateKey);
 
                 //var url = string.Format("{0}{1}", BaseUri, uri);
-                var url = new UriBuilder(BaseUri);
+                var url = new UriBuilder(_baseUri);
                 url.Path = uri;
                 var queryParameters = HttpUtility.ParseQueryString(string.Empty);
                 //queryParameters["criteria"] = reference;
@@ -563,7 +569,7 @@ namespace test
                 // the public and private key should be changed to the correct values for the rep
                 var token = GenerateAuthenticationToken("get", uri, headerDate, DefaultPublicKey, DefaultPrivateKey);
 
-                var url = string.Format("{0}{1}", BaseUri, uri);
+                var url = string.Format("{0}{1}", _baseUri, uri);
                 Console.WriteLine(url);
 
                 var request = (HttpWebRequest)WebRequest.Create(url);
@@ -670,7 +676,7 @@ namespace test
                 // the public and private key should be changed to the correct values for the rep
                 var token = GenerateAuthenticationToken("post", uri, headerDate, DefaultPublicKey, DefaultPrivateKey);
                 var authorization = new AuthenticationHeaderValue("TSI", token);
-                var url = string.Format("{0}{1}", BaseUri, uri);
+                var url = string.Format("{0}{1}", _baseUri, uri);
 
 
                 Console.WriteLine(url);
@@ -679,7 +685,7 @@ namespace test
                 using (var client = new HttpClient())
                 {
                     Console.WriteLine("Starting Task...");
-                    client.BaseAddress = new Uri(BaseUri);
+                    client.BaseAddress = new Uri(_baseUri);
                     client.DefaultRequestHeaders.Add("X-TSI-Date", headerDate);
                     client.DefaultRequestHeaders.Accept.Clear();
                     client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/xml"));
