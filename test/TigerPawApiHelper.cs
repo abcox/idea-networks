@@ -151,8 +151,10 @@ namespace test
             return response;
         }
 
-        private HttpWebRequest GetRequest(string path, string method, byte[] data = null)
+        private HttpWebRequest GetRequest(string path, string method, string data = null)
         {
+            // NOTE:  may want to review using https://github.com/restsharp/RestSharp
+
             var headerDate = GetHeaderDateTime();
 
             // the public and private key should be changed to the correct values for the rep
@@ -173,16 +175,18 @@ namespace test
             request.Headers.Add("X-TSI-Date", headerDate);
             request.Accept = DefaultAcceptHeader;
             request.ContentType = DefaultAcceptHeader;
-            
+
             if (method == WebRequestMethods.Http.Post)
             {
+                var encoding = new UTF8Encoding();
+                var postData = encoding.GetBytes(data);
                 request.ContentLength = data.Length;
-                request.GetRequestStream().Write(data, 0, data.Length);
+                request.ContentType = "application/json";
+                request.GetRequestStream().Write(postData, 0, postData.Length);
             }
 
             return request;
         }
-
 
         /// <summary>
         /// Sample of testing user authentication.
@@ -197,19 +201,41 @@ namespace test
 
                 //var serviceOrder = new ServiceOrdersPostRequest();
                 string xmlPostData = null;
-                using (var stringWriter = new StringWriter())
-                {
-                    using (XmlWriter xmlWriter = XmlWriter.Create(stringWriter))
+                // serialize to XML
+                //using (var stringWriter = new StringWriter())
+                //{
+                //    using (XmlWriter xmlWriter = XmlWriter.Create(stringWriter))
+                //    {
+                //        XmlSerializer xmlSerializer = new XmlSerializer(typeof(ServiceOrdersPostRequest));
+                //        xmlSerializer.Serialize(xmlWriter, serviceOrdersPostRequest);
+                //        xmlPostData = stringWriter.ToString();
+                //    }
+                //}
+                // serialize to json
+                var jsonPostData = JsonConvert.SerializeObject(
+                    serviceOrdersPostRequest,
+                    Newtonsoft.Json.Formatting.None,
+                    new JsonSerializerSettings
                     {
-                        XmlSerializer xmlSerializer = new XmlSerializer(typeof(ServiceOrdersPostRequest));
-                        xmlSerializer.Serialize(xmlWriter, serviceOrdersPostRequest);
-                        xmlPostData = stringWriter.ToString();
-                    }
-                }
-                postData = xmlPostData;
-                var encoding = new UTF8Encoding();
-                var data = encoding.GetBytes(postData);
-                var request = GetRequest(path, WebRequestMethods.Http.Post, data);
+                        DefaultValueHandling = DefaultValueHandling.Ignore,
+                        NullValueHandling = NullValueHandling.Ignore,
+                    });
+                //postData = xmlPostData;
+                //postData = jsonPostData;
+                //var encoding = new ASCIIEncoding();
+                //var data = encoding.GetBytes(postData);
+                var request = GetRequest(path, WebRequestMethods.Http.Post, jsonPostData);
+
+                //request.ContentLength = data.Length;
+                //using (var streamWriter = new StreamWriter(request.GetRequestStream()))
+                //{
+                //    //string json = "{\"user\":\"test\"," +
+                //    //              "\"password\":\"bla\"}";
+
+                //    streamWriter.Write(jsonPostData);
+                //    streamWriter.Flush();
+                //    streamWriter.Close();
+                //}
 
                 HttpWebResponse response = (HttpWebResponse)request.GetResponse();
 
@@ -219,11 +245,64 @@ namespace test
                     ServiceOrdersPostResponse serviceOrdersPostResponse = null;
                     using (var reader = new StreamReader(response.GetResponseStream(), ASCIIEncoding.UTF8))
                     {
-                        XmlSerializer serializer = new XmlSerializer(typeof(DiagnosticsValidateUserResponse));
+                        //var responseValue = reader.ReadToEnd();
+                        XmlSerializer serializer = new XmlSerializer(typeof(ServiceOrdersPostResponse));
                         serviceOrdersPostResponse = (ServiceOrdersPostResponse)serializer.Deserialize(reader);
                         reader.Close();
                     }
                     Console.WriteLine($"Call to {path} {(serviceOrdersPostResponse.Success ? "succeeded" : "failed")}: {serviceOrdersPostResponse.Message}");
+
+                    return serviceOrdersPostResponse;
+                }
+                else
+                {
+                    Console.WriteLine($"Call to {path} responsed with status code {response.StatusCode}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Call to {path} raised exception. {ex.Message}");
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Sample of testing user authentication.
+        /// </summary>
+        public AccountsPostResponse AccountsPost(AccountsPostRequest accountsPostRequest)
+        {
+            const string path = "/api/accounts";
+            Console.WriteLine($"Calling endpoint at {path}...");
+            try
+            {
+                // serialize to json
+                var jsonPostData = JsonConvert.SerializeObject(
+                    accountsPostRequest,
+                    Newtonsoft.Json.Formatting.None,
+                    new JsonSerializerSettings
+                    {
+                        DefaultValueHandling = DefaultValueHandling.Ignore,
+                        NullValueHandling = NullValueHandling.Ignore,
+                    });
+                var request = GetRequest(path, WebRequestMethods.Http.Post, jsonPostData);
+                
+                HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    //WebHeaderCollection headers = response.Headers;
+                    AccountsPostResponse accountsPostResponse = null;
+                    using (var reader = new StreamReader(response.GetResponseStream(), ASCIIEncoding.UTF8))
+                    {
+                        //var responseValue = reader.ReadToEnd();
+                        XmlSerializer serializer = new XmlSerializer(typeof(AccountsPostResponse));
+                        accountsPostResponse = (AccountsPostResponse)serializer.Deserialize(reader);
+                        reader.Close();
+                    }
+                    Console.WriteLine($"Call to {path} {(accountsPostResponse.Success ? "succeeded" : "failed")}: {accountsPostResponse.Message}");
+
+                    return accountsPostResponse;
                 }
                 else
                 {

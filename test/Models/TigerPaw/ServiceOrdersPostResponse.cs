@@ -1,13 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Xml.Serialization;
 
 namespace test.Models.TigerPaw
 {
-    class ServiceOrdersPostResponse
+    [XmlRoot(
+        //Namespace = "www.contoso.com",
+        ElementName = "ServiceOrderResponse",
+        DataType = "string",
+        IsNullable = true
+        )]
+    public class ServiceOrdersPostResponse
     {
+        [System.Xml.Serialization.XmlElement("ServiceOrderSummary")]
         public ServiceOrderSummary ServiceOrderSummary { get; set; }
+
+        [System.Xml.Serialization.XmlElement("Success")]
         public bool Success { get; set; }
+
+        [System.Xml.Serialization.XmlElement("Message")]
         public string Message { get; set; }
     }
 

@@ -38,25 +38,52 @@ namespace test
             // user authentication check
             tpApi.GetDiagnosticsValidateUser();
 
+            var id = Guid.NewGuid();
+
             // TEST ServiceOrdersPost
-            var serviceOrder = new ServiceOrdersPostRequest()
+            var accounts = new AccountsPostRequest()
             {
-                AccountNumber = 1000,
-                BriefDescription = @"Test from IdeaNetworks (adam@adamcox.net)",
-                DateTimeRequested = new DateTimeRequested {
-                    Date = DateTime.UtcNow,
-                    Time = DateTime.UtcNow,
-                },
-                BillToAddressType = "Default",
-                BillTo = new BillTo
+                Account = new Account
                 {
-                    Address1 = "12345 Main St",
-                    City = "Wilmington",
-                    State = "NC",
-                    PostalCode = "28403"
+                    Name = $"Test account {id}",
+                    RepNumber = 19,
+                    Status = "Active",
+                    AccountType = "Prospect",
+                },
+                PrimaryPhoneNumber = new PrimaryPhoneNumber
+                {
+                    Number = "555-1234",
                 }
             };
-            tpApi.ServiceOrdersPost(serviceOrder);
+            var accountsPostResponse = tpApi.AccountsPost(accounts);
+            var accountNumber = accountsPostResponse.AccountSummary?.AccountNumber ?? 0;
+            Console.WriteLine($"Service order post {(accountsPostResponse.Success ? "succeeded" : "failed")}. Number: {accountNumber}");
+
+            // TEST ServiceOrdersPost
+            if (accountsPostResponse.Success)
+            {
+                var serviceOrder = new ServiceOrdersPostRequest()
+                {
+                    AccountNumber = accountNumber,
+                    BriefDescription = $@"TEST {id}",
+                    DateTimeRequested = new DateTimeRequested
+                    {
+                        Date = DateTime.UtcNow,
+                        Time = DateTime.UtcNow,
+                    },
+                    BillToAddressType = "Default",
+                    BillTo = new BillTo
+                    {
+                        Name = "Test!",
+                        Address1 = "12345 Main St",
+                        City = "Wilmington",
+                        State = "NC",
+                        PostalCode = "28403"
+                    }
+                };
+                var serviceOrdersPostResponse = tpApi.ServiceOrdersPost(serviceOrder);
+                Console.WriteLine($"Service order post {(serviceOrdersPostResponse.Success ? "succeeded" : "failed")}. Reference: {serviceOrdersPostResponse.ServiceOrderSummary?.ServiceOrder?.Reference}");
+            }
 
             // TEST dapper pull of quotes
             List<Quote> quotes = null;
