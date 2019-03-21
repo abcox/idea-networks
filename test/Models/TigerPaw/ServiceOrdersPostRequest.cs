@@ -188,29 +188,29 @@ namespace test.Models.TigerPaw
         public DateTime DateTime { get; set; }
     }
 
-    public class BillTo
-    {
-        public string Name { get; set; }
-        public string Address1 { get; set; }
-        public string Address2 { get; set; }
-        public string City { get; set; }
-        public string State { get; set; }
-        public string PostalCode { get; set; }
-        public string Country { get; set; }
-        public string ContactName { get; set; }
-        public string ContactPhone { get; set; }
-    }
+    //public class BillTo
+    //{
+    //    public string Name { get; set; }
+    //    public string Address1 { get; set; }
+    //    public string Address2 { get; set; }
+    //    public string City { get; set; }
+    //    public string State { get; set; }
+    //    public string PostalCode { get; set; }
+    //    public string Country { get; set; }
+    //    public string ContactName { get; set; }
+    //    public string ContactPhone { get; set; }
+    //}
 
-    public class ShipTo
-    {
-        public string Name { get; set; }
-        public string Address1 { get; set; }
-        public string Address2 { get; set; }
-        public string City { get; set; }
-        public string State { get; set; }
-        public string PostalCode { get; set; }
-        public string Country { get; set; }
-        public string ContactName { get; set; }
-        public string ContactPhone { get; set; }
-    }
+    //public class ShipTo
+    //{
+    //    public string Name { get; set; }
+    //    public string Address1 { get; set; }
+    //    public string Address2 { get; set; }
+    //    public string City { get; set; }
+    //    public string State { get; set; }
+    //    public string PostalCode { get; set; }
+    //    public string Country { get; set; }
+    //    public string ContactName { get; set; }
+    //    public string ContactPhone { get; set; }
+    //}
 }

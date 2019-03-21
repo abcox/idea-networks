@@ -250,7 +250,7 @@ namespace test
                         serviceOrdersPostResponse = (ServiceOrdersPostResponse)serializer.Deserialize(reader);
                         reader.Close();
                     }
-                    Console.WriteLine($"Call to {path} {(serviceOrdersPostResponse.Success ? "succeeded" : "failed")}: {serviceOrdersPostResponse.Message}");
+                    Console.WriteLine($"Call to {path} {(serviceOrdersPostResponse.Success ? "succeeded" : "failed")}. Message: {(serviceOrdersPostResponse.Message ?? "none")}");
 
                     return serviceOrdersPostResponse;
                 }

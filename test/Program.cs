@@ -41,23 +41,25 @@ namespace test
             var id = Guid.NewGuid();
 
             // TEST ServiceOrdersPost
-            var accounts = new AccountsPostRequest()
-            {
-                Account = new Account
-                {
-                    Name = $"Test account {id}",
-                    RepNumber = 19,
-                    Status = "Active",
-                    AccountType = "Prospect",
-                },
-                PrimaryPhoneNumber = new PrimaryPhoneNumber
-                {
-                    Number = "555-1234",
-                }
-            };
-            var accountsPostResponse = tpApi.AccountsPost(accounts);
-            var accountNumber = accountsPostResponse.AccountSummary?.AccountNumber ?? 0;
-            Console.WriteLine($"Service order post {(accountsPostResponse.Success ? "succeeded" : "failed")}. Number: {accountNumber}");
+            //var accounts = new AccountsPostRequest()
+            //{
+            //    Account = new Account
+            //    {
+            //        Name = $"Test account {id}",
+            //        RepNumber = 68,
+            //        Status = "Active",
+            //        AccountType = "Prospect",
+            //    },
+            //    PrimaryPhoneNumber = new PrimaryPhoneNumber
+            //    {
+            //        Number = "555-1234",
+            //    }
+            //};
+            var accountNumber = 10177;
+            var accountsPostResponse = new AccountsPostResponse { Success = true };
+            //accountsPostResponse = tpApi.AccountsPost(accounts);
+            //accountNumber = accountsPostResponse.AccountSummary?.AccountNumber ?? 0;
+            //Console.WriteLine($"Service order post {(accountsPostResponse.Success ? "succeeded" : "failed")}. Number: {accountNumber}");
 
             // TEST ServiceOrdersPost
             if (accountsPostResponse.Success)
@@ -65,7 +67,7 @@ namespace test
                 var serviceOrder = new ServiceOrdersPostRequest()
                 {
                     AccountNumber = accountNumber,
-                    BriefDescription = $@"TEST {id}",
+                    BriefDescription = $@"TEST {id}", // 8c972fea-5327-4ecf-b113-fca8bc09a3cb
                     DateTimeRequested = new DateTimeRequested
                     {
                         Date = DateTime.UtcNow,
@@ -82,7 +84,7 @@ namespace test
                     }
                 };
                 var serviceOrdersPostResponse = tpApi.ServiceOrdersPost(serviceOrder);
-                Console.WriteLine($"Service order post {(serviceOrdersPostResponse.Success ? "succeeded" : "failed")}. Reference: {serviceOrdersPostResponse.ServiceOrderSummary?.ServiceOrder?.Reference}");
+                Console.WriteLine($"Service order post {(serviceOrdersPostResponse.Success ? "succeeded" : "failed")}. AccountNumber: {serviceOrdersPostResponse.ServiceOrderSummary?.ServiceOrder?.AccountNumber}");
             }
 
             // TEST dapper pull of quotes

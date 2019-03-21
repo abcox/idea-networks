@@ -6,6 +6,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Models\TigerPaw\ServiceOrdersPostResponse - Copy.cs" />
+    <Compile Remove="Models\TigerPaw\ServiceOrdersPostResponse2.cs" />
+    <Compile Remove="Models\TigerPaw\ServiceOrdersPostResponse2c.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Dapper" Version="1.60.1" />
     <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="2.2.0" />
