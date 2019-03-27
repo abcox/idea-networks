@@ -10,7 +10,9 @@ namespace test
 {
     class ProQuoteDataHelper
     {
-        public static Quote GetQuote(string name)
+        public ProQuoteDataHelper() { }
+
+        public Quote GetQuote(string name)
         {
             Quote quote = null;
             name = GetQuoteByName(name);
@@ -24,13 +26,23 @@ namespace test
             return new List<QuoteItem>();
         }
 
-        static string GetQuoteByName(string name)
+        private ConfigurationHelper _configHelp;
+
+        private string ConnectionString
+        {
+            get
+            {
+                if (_configHelp == null) _configHelp = new ConfigurationHelper();
+                return _configHelp.ProQuoteConnectionString;
+            }
+        }
+
+        string GetQuoteByName(string name)
         {
             //string name = null;
-            var connectionString = ConfigurationHelper.ProQuoteConnectionString;
             var cmdText = $"select top 1 [name] from tblquote_main where [name] = '{name}'";
 
-            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            using (SqlConnection sqlConnection = new SqlConnection(ConnectionString))
             {
                 sqlConnection.Open();
                 using (SqlCommand command = new SqlCommand(cmdText, sqlConnection))
@@ -61,7 +73,7 @@ namespace test
             return name;
         }
 
-        public static List<Quote> GetQuotes()
+        public List<Quote> GetQuotes()
         {
             // https://dapper-tutorial.net/
 
@@ -78,8 +90,7 @@ namespace test
                 order by st.changedon"; // TODO: make stored proc?
 
             List<Quote> quotes = null;
-            var connectionString = ConfigurationHelper.ProQuoteConnectionString;
-            using (var connection = new SqlConnection(connectionString))
+            using (var connection = new SqlConnection(ConnectionString))
             {
                 quotes = connection.Query<Quote>(sql).ToList();
                 //FiddleHelper.WriteTable(results);
@@ -102,7 +113,7 @@ namespace test
                 where se.quote_id = {quoteId}"; // TODO: make stored proc?
 
             List<QuoteItem> results = null;
-            var connectionString = ConfigurationHelper.ProQuoteConnectionString;
+            var connectionString = new ConfigurationHelper().ProQuoteConnectionString;
             using (var connection = new SqlConnection(connectionString))
             {
                 results = connection.Query<QuoteItem>(sql).ToList();

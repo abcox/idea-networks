@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.IO;
 using test.Models.ProQuote;
 using test.Models.TigerPaw;
+using Tsi.Web.Api;
+using Tsi.Web.Model;
 
 namespace test
 {
@@ -13,30 +15,60 @@ namespace test
 
         static void Main(string[] args)
         {
-            var config = ConfigurationHelper.Configuration;
-            var storageConnectionString = config.GetConnectionString("ProQuote");
-            string tsiApiEnvironment = "tsiApi_sand";
-#if !DEBUG
-            tsiApiEnvironment = "tsiApi_prod";
+            var config = new ConfigurationHelper();
+            var storageConnectionString = config.ProQuoteConnectionString; //.GetConnectionString("ProQuote");
+                                                                           //string tsiApiEnvironment = "tsiApi_sand";
+#if DEBUG
+            config.EnvironmentSelected = ConfigurationHelper.Environment.Sandbox;
+#else
+            //tsiApiEnvironment = "tsiApi_prod";
+            config.EnvironmentSelected = ConfigurationHelper.Environment.Production;
 #endif
-            var serviceUrl = config.GetSection($"{tsiApiEnvironment}:serviceUrl").Value;
-            var privateKey = config.GetSection($"{tsiApiEnvironment}:privateKey").Value;
-            var publicKey = config.GetSection($"{tsiApiEnvironment}:publicKey").Value;
+            var apiBaseUrl = config.ApiBaseUrl; // config.GetSection($"{tsiApiEnvironment}:serviceUrl").Value;
+            var apiPrivateKey = config.ApiPrivateKey; // config.GetSection($"{tsiApiEnvironment}:privateKey").Value;
+            var apiPublicKey = config.ApiPublicKey; // config.GetSection($"{tsiApiEnvironment}:publicKey").Value;
 
             //Console.WriteLine($"PublicKey: {publicKey}, PrivateKey: {privateKey}");
 
             var tpApi = new TigerPawApiHelper(
-                serviceUrl: serviceUrl,
-                privateKey: privateKey,
-                publicKey: publicKey
+                serviceUrl: apiBaseUrl,
+                privateKey: apiPrivateKey,
+                publicKey: apiPublicKey
                 );  // unauthorized (401)
+
+            // instance
+            var instance = new ServiceOrdersApi(new Tsi.Web.Client.Configuration(
+                apiKeyPrefix: null,
+                apiKey: new Dictionary<string, string> {
+                    { "private", config.ApiPrivateKey },
+                    { "public", config.ApiPublicKey }
+                },
+                basePath: config.ApiBaseUrl,
+                defaultHeader: null // TODO: is this where we can create header as required (via method calls)
+                )
+            );
+
+            // configure request
+            int? serviceOrderNumber = 80280;
+            TsiWebCreateServiceOrderPartsUsedModel model = new TsiWebCreateServiceOrderPartsUsedModel
+                (
+                lineNumber: 1, // Note: existing line item will be pushed down
+                               //itemId: "Cat 6 RJ45 insert",
+                priceBookItemNumber: 97, // look up via PriceBookSearchByItemTypeTest
+                itemDescription: "Cat 6 RJ45 insert",
+                useBookPricesAndDiscounts: true,
+                quantity: 3
+                );
+
+            // call api
+            var response = instance.ServiceOrdersCreateServiceOrderPartsUsed(serviceOrderNumber, model);
 
             // todo:  parse args and validate, if none or badly formed (invalid), then present command useage
 
             // todo:  validate request
 
             // user authentication check
-            tpApi.GetDiagnosticsValidateUser();
+            //tpApi.GetDiagnosticsValidateUser();  // the old way!
 
             var id = Guid.NewGuid();
 
@@ -91,7 +123,7 @@ namespace test
             List<Quote> quotes = null;
             try
             {
-                quotes = ProQuoteDataHelper.GetQuotes();
+                quotes = new ProQuoteDataHelper().GetQuotes();
                 Console.Write($"Quote count = {quotes.Count}");
             }
             catch (Exception ex)
@@ -103,7 +135,7 @@ namespace test
             if (args.Length > 0) quoteName = args[0];
 
             // todo: lookup this quoteNumber in ProQuote (table) ?
-            var quote = ProQuoteDataHelper.GetQuote(quoteName);
+            var quote = new ProQuoteDataHelper().GetQuote(quoteName);
             if (quote == null)
             {
                 var msg = $"Quote with name {quoteName} not found.";

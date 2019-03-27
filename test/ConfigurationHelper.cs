@@ -8,9 +8,45 @@ namespace test
 {
     class ConfigurationHelper
     {
+        public enum Environment
+        {
+            Production,
+            Sandbox
+        }
         private static IConfigurationRoot _config = null;
+        private Environment _environment;
 
-        public ConfigurationHelper() { _config = null; }
+        public ConfigurationHelper(Environment environment)
+        {
+            _config = null;
+            _environment = environment;
+        }
+
+        public ConfigurationHelper()
+        {
+            _config = null;
+            _environment = Environment.Sandbox;
+        }
+
+        public Environment EnvironmentSelected
+        {
+            get
+            {
+                return _environment;
+            }
+            set
+            {
+                _environment = value;
+            }
+        }
+
+        public string EnvironmentString
+        {
+            get
+            {
+                return EnvironmentSelected.ToString();
+            }
+        }
 
         public static IConfiguration Configuration
         {
@@ -26,6 +62,9 @@ namespace test
             }
         }
 
-        public static string ProQuoteConnectionString => Configuration.GetConnectionString("ProQuote");
+        public string ProQuoteConnectionString => Configuration.GetConnectionString("ProQuote");
+        public string ApiBaseUrl => Configuration.GetSection($"{EnvironmentString}:baseUrl").Value;
+        public string ApiPrivateKey => Configuration.GetSection($"{EnvironmentString}:privateKey").Value;
+        public string ApiPublicKey => Configuration.GetSection($"{EnvironmentString}:publicKey").Value;
     }
 }

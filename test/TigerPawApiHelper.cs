@@ -197,10 +197,10 @@ namespace test
             Console.WriteLine($"Calling endpoint at {path}...");
             try
             {
-                string postData = null;
+                //string postData = null;
 
                 //var serviceOrder = new ServiceOrdersPostRequest();
-                string xmlPostData = null;
+                //string xmlPostData = null;
                 // serialize to XML
                 //using (var stringWriter = new StringWriter())
                 //{
@@ -689,51 +689,51 @@ namespace test
 
                             return new Models.TigerPaw.Responses.ServiceOrderSearchResponse();
 
-                            Console.WriteLine("Processing Response...");
-                            using (var stream = response.GetResponseStream())
-                            {
-                                if (stream != null)
-                                {
-                                    var reader = new StreamReader(stream);
-                                    var responseValue = reader.ReadToEnd();
-                                    var document = XDocument.Parse(responseValue);
+                            //Console.WriteLine("Processing Response...");
+                            //using (var stream = response.GetResponseStream())
+                            //{
+                            //    if (stream != null)
+                            //    {
+                            //        var reader = new StreamReader(stream);
+                            //        var responseValue = reader.ReadToEnd();
+                            //        var document = XDocument.Parse(responseValue);
 
-                                    if (document.Root != null)
-                                    {
-                                        var decendants = document.Descendants("SearchAccountResponse");
-                                        var results = (from i in decendants
-                                                       let xSuccess = i.Element("Success")
-                                                       let xTotalCount = i.Element("TotalCount")
-                                                       let xPageSize = i.Element("PageSize")
-                                                       let xNextRow = i.Element("NextRow")
-                                                       select new
-                                                       {
-                                                           Success = xSuccess != null && Convert.ToBoolean(xSuccess.Value),
-                                                           TotalCount = Convert.ToInt32(xTotalCount.Value),
-                                                           PageSize = Convert.ToInt32(xPageSize.Value),
-                                                           NextRow = Convert.ToInt32(xNextRow.Value)
-                                                       }).FirstOrDefault();
+                            //        if (document.Root != null)
+                            //        {
+                            //            var decendants = document.Descendants("SearchAccountResponse");
+                            //            var results = (from i in decendants
+                            //                           let xSuccess = i.Element("Success")
+                            //                           let xTotalCount = i.Element("TotalCount")
+                            //                           let xPageSize = i.Element("PageSize")
+                            //                           let xNextRow = i.Element("NextRow")
+                            //                           select new
+                            //                           {
+                            //                               Success = xSuccess != null && Convert.ToBoolean(xSuccess.Value),
+                            //                               TotalCount = Convert.ToInt32(xTotalCount.Value),
+                            //                               PageSize = Convert.ToInt32(xPageSize.Value),
+                            //                               NextRow = Convert.ToInt32(xNextRow.Value)
+                            //                           }).FirstOrDefault();
 
 
-                                        if (results != null
-                                            && results.Success == true)
-                                        {
-                                            message = string.Format("Matching accounts {0}", results.TotalCount);
+                            //            if (results != null
+                            //                && results.Success == true)
+                            //            {
+                            //                message = string.Format("Matching accounts {0}", results.TotalCount);
 
-                                            var currentPage = document.Descendants("AccountSummary");
-                                            currentPage.ToList().ForEach(PrintAccountName);
-                                        }
-                                        else
-                                        {
-                                            message = "Did not process response properly.";
-                                        }
-                                    }
-                                    else
-                                    {
-                                        message = "No document root found.";
-                                    }
-                                }
-                            }
+                            //                var currentPage = document.Descendants("AccountSummary");
+                            //                currentPage.ToList().ForEach(PrintAccountName);
+                            //            }
+                            //            else
+                            //            {
+                            //                message = "Did not process response properly.";
+                            //            }
+                            //        }
+                            //        else
+                            //        {
+                            //            message = "No document root found.";
+                            //        }
+                            //    }
+                            //}
                         }
                         else
                         {
