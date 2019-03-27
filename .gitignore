@@ -5,4 +5,4 @@
 /.vs/test/v15/Server/sqlite3
 /test/obj
 /.vs
-/test/bin/Debug/netcoreapp2.1/win10-x64
+/test/bin
