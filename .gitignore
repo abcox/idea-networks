@@ -7,3 +7,5 @@
 /.vs
 /test/bin
 /test/*.user
+/proquote/bin/Debug/netcoreapp2.1
+/proquote/obj
