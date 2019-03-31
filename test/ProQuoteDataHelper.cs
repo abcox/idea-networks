@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
+using test.Models;
 using test.Models.ProQuote;
 
 namespace test
@@ -33,7 +34,7 @@ namespace test
             get
             {
                 if (_configHelp == null) _configHelp = new ConfigurationHelper();
-                return _configHelp.ProQuoteConnectionString;
+                return _configHelp.TigerDashConnectionString; // .ProQuoteConnectionString;
             }
         }
 
@@ -41,6 +42,7 @@ namespace test
         {
             //string name = null;
             var cmdText = $"select top 1 [name] from tblquote_main where [name] = '{name}'";
+            var connectionString = new ConfigurationHelper().ProQuoteConnectionString;
 
             using (SqlConnection sqlConnection = new SqlConnection(ConnectionString))
             {
@@ -71,6 +73,52 @@ namespace test
                 }
             }
             return name;
+        }
+
+        public List<QuoteBillToItem> GetQuote_JobOpen_Quote_BillTo(string quoteNumber)
+        {
+            //string name = null;
+            var connectionString = new ConfigurationHelper().TigerDashConnectionString;
+
+            var cmdText = $"exec spIdea_TD_JobOpen_Quote_BillTo '{quoteNumber}'";
+
+            List<QuoteBillToItem> results = null;
+
+            using (SqlConnection sqlConnection = new SqlConnection(ConnectionString))
+            {
+                try
+                {
+                    results = sqlConnection.Query<QuoteBillToItem>(cmdText).ToList();
+                }
+                catch
+                {
+                    Console.WriteLine("Table not created.");
+                }
+            }
+            return results;
+        }
+
+        public List<TdLiveQuoteItem> GetTdLiveQuotes(DateTime startDate)
+        {
+            //string name = null;
+            var connectionString = new ConfigurationHelper().TigerDashConnectionString;
+
+            var cmdText = $"exec sp_Idea_LiveQuotesReturn '{startDate}'";
+
+            List<TdLiveQuoteItem> results = null;
+
+            using (SqlConnection sqlConnection = new SqlConnection(ConnectionString))
+            {
+                try
+                {
+                    results = sqlConnection.Query<TdLiveQuoteItem>(cmdText).ToList();
+                }
+                catch
+                {
+                    Console.WriteLine("Table not created.");
+                }
+            }
+            return results;
         }
 
         public List<Quote> GetQuotes()

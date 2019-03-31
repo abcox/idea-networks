@@ -63,6 +63,7 @@ namespace test
         }
 
         public string ProQuoteConnectionString => Configuration.GetConnectionString("ProQuote");
+        public string TigerDashConnectionString => Configuration.GetConnectionString("TigerDash");
         public string ApiBaseUrl => Configuration.GetSection($"{EnvironmentString}:baseUrl").Value;
         public string ApiPrivateKey => Configuration.GetSection($"{EnvironmentString}:privateKey").Value;
         public string ApiPublicKey => Configuration.GetSection($"{EnvironmentString}:publicKey").Value;

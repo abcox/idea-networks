@@ -144,6 +144,14 @@ namespace test
                 Environment.Exit(-1);
             }
 
+            string quoteNumber = "55131.17";
+            var results = new ProQuoteDataHelper().GetQuote_JobOpen_Quote_BillTo(quoteNumber);
+            foreach (var item in results)
+            {
+                Console.WriteLine($"Quote name '{item.QuoteName}'");
+            }
+
+
             Console.WriteLine($"Quote '{quote.Name}' found");
 
             var serviceOrders = tpApi.ServiceOrderSearchByReference(quoteName);
