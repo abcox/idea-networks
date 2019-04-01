@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -11,7 +12,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using proquote.Models;
+using proquote.Models.Entity;
+using proquote.Repositories;
 using Swashbuckle.AspNetCore.Swagger;
 
 namespace proquote
@@ -30,6 +32,11 @@ namespace proquote
         {
             var configurationSection = Configuration.GetSection("ConnectionStrings:ProQuote");
             services.AddDbContext<proquote_ideaContext>(options => options.UseSqlServer(configurationSection.Value));
+
+            services.AddTransient<IQuoteRepository, QuoteRepository>();
+
+            // Automapper
+            services.AddAutoMapper();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 

@@ -5,7 +5,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using proquote.Models;
+using proquote.Models.Entity;
+using proquote.Repositories;
 
 namespace proquote.Controllers
 {
@@ -14,10 +15,15 @@ namespace proquote.Controllers
     public class QuoteController : ControllerBase
     {
         private readonly proquote_ideaContext _context;
+        private readonly IQuoteRepository _repository;
 
-        public QuoteController(proquote_ideaContext context)
+        public QuoteController(
+            proquote_ideaContext context,
+            IQuoteRepository repository
+            )
         {
             _context = context;
+            _repository = repository;
         }
 
         // GET: api/Quote
@@ -30,21 +36,21 @@ namespace proquote.Controllers
 
         // GET: api/Quote/5
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetTblQuoteMain([FromRoute] int id)
+        public async Task<IActionResult> GetQuote([FromRoute] int id)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
+            
+            var quote = await _repository.GetQuote(id);
 
-            var tblQuoteMain = await _context.TblQuoteMain.FindAsync(id);
-
-            if (tblQuoteMain == null)
+            if (quote == null)
             {
                 return NotFound();
             }
 
-            return Ok(tblQuoteMain);
+            return Ok(quote);
         }
 
         // PUT: api/Quote/5
